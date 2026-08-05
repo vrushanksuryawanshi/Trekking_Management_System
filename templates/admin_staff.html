@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/main.css">
+    <title>AdminDashboard</title>
+</head>
+<body>
+    <header>
+        <h2>Trakking Management System (TMS) : Admin</h2>
+        <nav>
+            <a href="admin_dashboard.html"> Dashboard </a>|
+            <a href="admin_treks.html"> Trek </a>|
+            <a href="admin_staff.html"> Staff Management </a>|
+            <a href="admin_user.html"> User Management </a>|
+        </nav>
+    </header>
+
+    <main>
+        <h1>Staff Info: </h1>
+
+        <h3>Pending:</h3>
+            <table class="normal" border="1">
+                <tr><th>Staff ID</th>     <th>Name</th>     <th>Email</th>   <th>Contact</th>  <th>Actions</th></tr>
+                <tr><td>101</td>          <td>Vaibhav</td>  <td>XXX</td>      <td>XXXX</td>   
+                <td><input type="button" value="Approve"><input type="button" value="Reject"></td></tr>
+            </table>
+
+        <h3>Approved:</h3>
+            <table class="normal" border="1">
+                <tr><th>Staff ID</th>     <th>Name</th>     <th>Email</th>   <th>Contact</th>  <th>Actions</th></tr>
+                <tr><td>101</td>          <td>Vaibhav</td>  <td>XXX</td>      <td>XXXX</td>   
+                <td><input type="button" value="Blocklist"></td></tr>
+            </table>
+
+        <h3>Blacklisted:</h3>
+            <table class="normal" border="1">
+                <tr><th>Staff ID</th>     <th>Name</th>     <th>Email</th>   <th>Contact</th>  <th>Actions</th></tr>
+                <tr><td>101</td>          <td>Vaibhav</td>  <td>XXX</td>      <td>XXXX</td>   
+                <td><input type="button" value="Unblock"></td></tr>
+            </table>
+    </main>
+
+    <footer>© 2026 Trekking Management System</footer>
+</body>
+</html>

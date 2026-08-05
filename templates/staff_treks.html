@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/main.css">
+    <title>StaffDashboard</title>
+</head>
+<body>
+    <header>
+        <h2>Trakking Management System (TMS) : Staff</h2>
+    </header>
+
+    <main>
+        <h1>Trek Info: </h1>
+        <table class="Dashboard">
+            <tr><th>Location</th>   <th>Duration(days)</th><th>Start Date</th> <th>Total Slots</th> <th>Available Slots</th> <th>Status</th></tr>
+            <tr><td>Himalaya</td>   <td>12</td>            <td>xx/xx/xxxx</td> <td>20</td>          <td><input type="number" name="avilability"></td>          
+                <td><select name="T_status">
+                    <option value="Open">Open</option>
+                    <option value="Closed">Closed</option>
+                </td></tr>
+        </table>
+
+        <h3>Participants: </h3>
+        <table class="normal" border="1">
+            <tr><th>User Name</th> <th>Email</th>   <th>Booking Date</th>   <th>Status</th></tr>
+            <tr><td>Vaibhav</td>   <td>hi@gmail.com</td>   <td>xx/xx/xxxx</td> <td>Booked</td></tr>
+        </table>
+        <input type="button" class="but" value="Mark as Completed">
+    </main>
+
+    <footer>© 2026 Trekking Management System</footer>
+</body>
+</html>

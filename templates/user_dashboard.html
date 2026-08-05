@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/main.css">
+    <title>UserDashboard</title>
+</head>
+<body>
+    <header>
+        <h2>Trakking Management System (TMS) : User</h2>
+        <nav>
+            <a href="user_dashboard.html"> Dashboard </a>|
+            <a href="user_book.html"> Bookings </a>|
+            <a href="user_history.html"> My Trekkings </a>|
+        </nav>
+    </header>
+
+    <main>
+        <h1>Welcome, User!</h1>
+
+        <h2 style="text-align: center;">Available Treks</h2> 
+        <div class="center">
+            <select name="filter_diff">
+                <option value="All" disabled selected>Difficulty : All</option>
+                <option value="Hard">Hard</option>
+                <option value="Moderate">Moderate</option>
+                <option value="Easy">Easy</option>
+            </select>
+            <select name="filter_loc">
+                <option value="All" disabled selected>Location : All</option>
+                <option value="Mum">Mumbai</option>
+                <option value="Himalaya">Himalaya</option>
+                <option value="Nepal">Nepal</option>
+            </select>
+        </div>
+
+        <table class="normal" border="1">
+            <tr><th>Trek Name</th> <th>Location</th>   <th>Difficulty</th>   <th>Duration(days)</th>   <th>Available Slots</th> <th>Action</th></tr>
+            <tr><td>XYZ</td>       <td>Nepalk</td>     <td>Medium</td>       <td>15</td>               <td>10</td>
+                <td><input type="button" value="Book" onclick="window.location.href='user_book.html'"></td>
+            </tr>
+        </table>
+
+        <h2>My Bookings</h2>
+        <table class="normal" border="1">
+            <tr><th>Trek Name</th> <th>Booking Date</th>   <th>Status</th>      <th>Action</th></tr>
+            <tr><td>XYZ</td>       <td>xx/xx/xxxx</td>     <td>Booked</td>      
+                <td><input type="button" value="View_Details" onclick="window.location.href='user_book.html'"></td>
+            </tr>
+        </table>
+        
+    </main>
+
+    <footer>© 2026 Trekking Management System</footer>
+</body>
+</html>
