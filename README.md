@@ -1,2 +1,10 @@
-# 23f2003107
-MAD - 1 project for IITM
+# Trekking Management System
+
+# MVC
+
+# View Implementation
+## HTML / CSS
+
+# Controller
+
+# Model

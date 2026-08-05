@@ -1,0 +1,14 @@
+.login{
+    position:absolute;
+    top:50%;
+    left:25%;
+    transform:translate(-50%,-50%);
+    color: rgb(2, 56, 67);
+    text-align:justify;
+    font-size: 20px;
+    margin:auto;
+    border:1px solid rgb(3, 3, 78);
+    border-radius: 10px;
+    padding: 20px;
+
+}
