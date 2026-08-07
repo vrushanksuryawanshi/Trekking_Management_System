@@ -12,6 +12,10 @@
     padding: 20px;
 }
 
+body {
+    padding-bottom: 50px;
+}
+
 footer{
     background:black;
     color:white;
@@ -23,15 +27,6 @@ footer{
     width: 100%;
 }
 
-.but{
-    background: #06662f;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 5px;
-}
 
 .center{
     margin: auto;
@@ -85,3 +80,46 @@ h1{
     padding: 10px;
     color: rgb(1, 42, 45);
 }
+
+.btn-link{
+    display: inline-block;
+
+    padding: 2px 5px;
+
+    text-decoration: none;
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: small;
+    background-color: #007bff;
+    color: #ffffff;
+    border-radius: 4px;
+
+    transition: background-color 0.2s ease;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.btn-link:hover{
+    background-color: #0056b3;
+}
+
+.btn-danger{
+    background-color: maroon;
+    color: #ffffff;
+    border-radius: 4px;
+}
+
+.btn-done{
+    background-color: darkgreen;
+    color: #ffffff;
+    border-radius: 4px;
+}
+
+.btn-big{
+    background-color: darkgreen;
+    color: #ffffff;
+    font-size:large;
+    border-radius: 4px;
+    padding: 5px 10px;
+}
+
