@@ -6,17 +6,16 @@
     <link rel="stylesheet" href="/static/main.css">
     <title>login</title>
 </head>
-<body background="/images/login_page_img.png">
+<body background={{ url_for('static', filename='images/login_page_img.png') }}>
 <div class="login">
     <h2>Login Now!</h2>
     <table>
-        <form>
+        <form action="/login" method="POST">
             <tr><td><label>Email:</label></td>           <td><input type="email" name="emailid"></td></tr>
             <tr><td><label>Password:</label></td>        <td><input type="password" name="pwd"></td></tr>
-            <tr><td><button value="Login">Login</button></td> <td><a href="signup.html">Not Registered?</a></td></tr>
+            <tr><td><input type="submit" value="Login">  <td><a href="signup.html">Not Registered?</a></td></tr>
         </form>
     </table>
 </div>
-<h3></h3>
 </body>
 </html>

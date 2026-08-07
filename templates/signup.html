@@ -6,25 +6,48 @@
     <link rel="stylesheet" href="/static/main.css">
     <title>Register</title>
 </head>
-<body background="/images/login_page_img.png">
+<body background={{ url_for('static', filename='images/login_page_img.png') }}>
 <div class="login">
     <h2>Register Now!</h2>
     <table>
-        <form>
-            <tr><td><label>Full Name:</label></td>       <td><input type="text" name="uname"></td></tr>
+        <form action="/register" method="POST">
+            <tr><td><label>Full Name:</label></td>       <td><input type="text" name="fname"></td></tr>
             <tr><td><label>Email:</label></td>           <td><input type="email" name="emailid"></td></tr>
             <tr><td><label>Password:</label></td>        <td><input type="password" name="pwd"></td></tr>
             <tr><td><label>User Type:</label></td>       
                 <td>
-                    <select name="utype">
+                    <select name="utype" onchange="hide_show_other_details()">
                         <option value="None" disabled selected>None</option>
-                        <option value="Trekker">Trekker</option>
-                        <option value="Staff">Staff</option>
+                        <option value="1">Trekker</option>
+                        <option value="2">Staff</option>
                     </td>
             </tr>
-            <tr><td><label>Phone No:</label></td>       <td><input type="phone" name="ph"></td></tr>
-            <tr><td><button value="Signup">Signup</button></td> <td><a href="login.html">Already Registered?</a></td></tr>
+            <tr><td><label>Phone No:</label></td>       <td><input type="text" name="phno"></td></tr>
+            <tr><td><label>Emergency_contact:</label></td>       <td><input type="text" name="emr_phno"></td></tr>
+            <tr><td><label>Address:</label></td>       <td><textarea rows="3" cols="20" name="address"></textarea></td></tr>
+
+            <tr id="exp_row" style="display:none;">
+                <td><label>Experience (years):</label></td>
+                <td><input type="number" name="exp"></td>
+            </tr>
+
+            <tr><td> <input type="submit" value="Signup"></td> <td><a href="login.html">Already Registered?</a></td></tr>
         </form>
+        <script>
+            function hide_show_other_details(){
+                const utype = document.getElementsByName("utype")[0];
+                const exp = document.getElementById("exp_row");
+
+                //if the useer selects other show the field, otherwise hide it.
+                if (utype.value == "2") {
+                    exp.style.display = "table-row";
+                }
+                else {
+                    exp.style.display = "none";
+                }
+            }
+
+        </script>
     </table>
 </div>
 <h3></h3>
