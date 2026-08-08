@@ -14,21 +14,63 @@
     <main>
         <h1>Trek Info: </h1>
         <table class="Dashboard">
-            <tr><th>Location</th>   <th>Duration(days)</th><th>Start Date</th> <th>Total Slots</th> <th>Available Slots</th> <th>Status</th></tr>
-            <tr><td>Himalaya</td>   <td>12</td>            <td>xx/xx/xxxx</td> <td>20</td>          <td><input type="number" name="avilability"></td>          
-                <td><select name="T_status">
-                    <option value="Open">Open</option>
-                    <option value="Closed">Closed</option>
-                </td></tr>
+            <tr><th>Location</th>   <th>Duration(days)</th> <th>Start Date</th> <th>Total Slots</th> <th>Available Slots</th> <th>Status</th></tr>
+            <tr><td>{{ trek.location }}</td>   
+                <td>{{ trek.duration_days }}</td>            
+                <td>{{ trek.start_date.strftime('%d-%m-%Y') }}</td> 
+                <td>{{ trek.total_slots }}</td>          
+                <td>{{ trek.avail_slots }}</td>          
+                <td>
+                    {% if trek.trek_status == 1 %}
+                        Approved
+                    {% elif trek.trek_status == 2 %}
+                        Open
+                    {% elif trek.trek_status == 3 %}
+                        Closed
+                    {% elif trek.trek_status == 4 %}
+                        Completed
+                    {% endif %}
+                </td>
+            </tr>
         </table>
 
         <h3>Participants: </h3>
         <table class="normal" border="1">
             <tr><th>User Name</th> <th>Email</th>   <th>Booking Date</th>   <th>Status</th></tr>
-            <tr><td>Vaibhav</td>   <td>hi@gmail.com</td>   <td>xx/xx/xxxx</td> <td>Booked</td></tr>
+            {% for booking in bookings %}
+            <tr><td>{{ booking.trekker_profiles.name }}</td>   
+                <td>{{ booking.trekker_profiles.users.email }}</td>   
+                <td>{{ booking.booking_date.strftime('%d-%m-%Y') }}</td> 
+                <td>
+                    {% if booking.booking_status == 0 %}
+                        Booked
+                    {% elif booking.booking_status == 1 %}
+                        Cancelled
+                    {% elif booking.booking_status == 2 %}
+                        Completed
+                    {% endif %}
+                </td>
+            </tr>
+
+        {% else %}
+
+        <tr><td colspan="4">No participants yet.</td></tr>
+        
+        {% endfor %}
         </table>
-        <a href="staff_dashboard.html" class="btn-link btn-done">Mark as Completed</a>
-    </main>
+
+        {% if trek.trek_status == 2 %}
+        <a href="{{ url_for('close_trek',staff_id=staff_id,trek_id=trek.trek_id) }}"class="btn-link btn-danger">
+            Close Trek</a>
+
+        {% elif trek.trek_status == 3 %}
+        <a href="{{ url_for('complete_trek',staff_id=staff_id,trek_id=trek.trek_id) }}"class="btn-link btn-done">
+        Mark as Completed</a>
+        {% endif %}
+
+        <a href="{{ url_for('staff_dashboard',staff_id=staff_id) }}"class="btn-link">
+        Back to Dashboard</a>
+        </main>
 
     <footer>© 2026 Trekking Management System</footer>
 </body>

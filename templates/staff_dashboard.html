@@ -15,14 +15,46 @@
         <h1>My Dashboard</h1>
         <table class="Dashboard">
             <tr><th>Assigned Treks</th><th>Total Participants</th><th>Currently Open Treks</th></tr>
-            <tr><td>3</td>              <td>30</td>               <td>2</td></tr>
+            <tr><td>{{ assigned_count }}</td>              
+                <td>{{ total_participants }}</td>               
+                <td>{{ open_count }}</td></tr>
         </table>
 
         <h3>My Assigned Treks</h3>
         <table class="normal" border="1">
-            <tr><th>Trek Name</th> <th>Location</th>   <th>Participants</th>   <th>Slots</th>   <th>Status</th>   <th>Actions</th></tr>
-            <tr><td>Everest</td>   <td>Himalaya</td>   <td>12</td>             <td>15</td>   <td>Open/Closed</td>
-                <td><a href="staff_treks.html" class="btn-link">Manage</a></td></tr>
+            <tr><th>Trek Name</th> <th>Location</th>   <th>Trek Date</th>   <th>Participants</th>   <th>Slots</th>   <th>Status</th>   <th>Actions</th></tr>
+            {% for trek in assigned_treks %}
+            <tr><td>{{ trek.trek_name }}</td>   
+                <td>{{ trek.location }}</td>   
+                <td>{{ trek.start_date.strftime('%d-%m-%Y') }}</td>             
+                <td>{{ trek.total_slots - trek.avail_slots }}</td>   
+                <td>{{ trek.avail_slots }} / {{ trek.total_slots }}</td>
+                <td>
+                    {% if trek.trek_status == 1 %}
+                        Approved
+                    {% elif trek.trek_status == 2 %}
+                        Open
+                    {% elif trek.trek_status == 3 %}
+                        Closed
+                    {% elif trek.trek_status == 4 %}
+                        Completed
+                    {% endif %}
+                </td>
+                <td>
+                    {% if trek.trek_status==1 %}
+                    <a href="{{ url_for('open_trek',trek_id=trek.trek_id,staff_id=staff.staff_id) }}" 
+                    class="btn-link btn-done">Open</a>
+                    {% elif trek.trek_status in [2,3] %}
+                    <a href="{{ url_for('staff_trek',trek_id=trek.trek_id, staff_id= staff.staff_id) }}"
+                    class="btn-link">Manage</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7">No approved treks assigned to you till now!</td>
+            </tr>
+            {% endfor %}
         </table>
     </main>
 

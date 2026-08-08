@@ -13,7 +13,7 @@
         <form action="/login" method="POST">
             <tr><td><label>Email:</label></td>           <td><input type="email" name="emailid"></td></tr>
             <tr><td><label>Password:</label></td>        <td><input type="password" name="pwd"></td></tr>
-            <tr><td><input type="submit" value="Login">  <td><a href="signup.html">Not Registered?</a></td></tr>
+            <tr><td><input type="submit" value="Login">  <td><a href="{{ url_for('signup')}} ">Not Registered?</a></td></tr>
         </form>
     </table>
 </div>

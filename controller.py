@@ -31,13 +31,14 @@ def signin():
             return render_template("user_dashboard.html")
 
         if user and user.role == 2:
-            staff = db.session.query(Staff_Profiles).filter(
-                Staff_Profiles.staff_id == user.id
-            ).first()
+            staff = db.session.query(Staff_Profiles).filter(Staff_Profiles.staff_id == user.id).first()
+
             if staff and staff.status == 2:
-                return render_template("staff_dashboard.html")
+                return redirect(url_for("staff_dashboard", staff_id=staff.staff_id))
+
             elif staff and staff.status == 1:
                 return "Your staff account has been blacklisted."
+
             else:
                 return "Your staff account is waiting for admin approval."
 
@@ -82,17 +83,30 @@ def signup():
 
 
 
-
+################################################################################################
 
 # ADMIN - Dashboard Management
 
 @app.route("/admin")
 def admin_dashboard():
-    return render_template("admin_dashboard.html")
+
+    total_treks = db.session.query(Treks).count()
+    total_users = db.session.query(Users).filter(Users.role == 1).count()
+    total_staff = db.session.query(Staff_Profiles).count()
+    total_bookings = db.session.query(Bookings).count()
+
+    # 5 most recent bookings
+    recent_bookings = db.session.query(Bookings).order_by(
+        Bookings.booking_date.desc()
+    ).limit(5).all()
+
+    return render_template(
+        "admin_dashboard.html",total_treks=total_treks,
+        total_users=total_users,total_staff=total_staff,
+        total_bookings=total_bookings,recent_bookings=recent_bookings)
 
 
-
-
+########################################################################################
 
 
 # ADMIN - User Management
@@ -132,7 +146,7 @@ def unblock_user(user_id):
 
 
 
-
+###########################################################################################
 
 # ADMIN - Treks Management
 
@@ -284,7 +298,7 @@ def admin_bookings():
     return render_template("admin_bookings.html",bookings=all_bookings)
 
 
-
+#################################################################################################
 
 
 # ADMIN - Staff Management
@@ -369,3 +383,91 @@ def blacklist_staff(staff_id):
     return redirect(url_for("admin_staff"))
 
 
+##############################################################################
+
+#STAFF - Dashboard
+
+@app.route("/staff/<int:staff_id>")
+def staff_dashboard(staff_id):
+
+    staff = db.session.query(Staff_Profiles).filter(Staff_Profiles.staff_id == staff_id).first()
+
+    if not staff:
+        return "Staff not found."
+
+    # Approved treks by admin to the staff with all the status of treks
+    assigned_treks = db.session.query(Treks).filter(Treks.staff_id == staff_id,Treks.trek_status.in_([1,2,3,4])).all()
+
+    # Count assigned approved treks
+    assigned_count = len(assigned_treks)
+
+    # Currently open treks assigned to this staff
+    open_count = db.session.query(Treks).filter(Treks.staff_id == staff_id,Treks.trek_status == 2).count()
+
+    # Total participants  are of the no. of booked slots
+    total_participants = 0
+
+    for trek in assigned_treks:
+        total_participants += (trek.total_slots - trek.avail_slots)
+
+    return render_template(
+        "staff_dashboard.html",staff=staff,
+        assigned_treks=assigned_treks,assigned_count=assigned_count,
+        open_count=open_count,total_participants=total_participants)
+
+
+#staff - open trek
+@app.route("/staff/<int:staff_id>/trek/<int:trek_id>/open")
+def open_trek(staff_id, trek_id):
+    trek = db.session.query(Treks).filter(Treks.trek_id == trek_id).first()
+    if not trek:
+        return "Trek not found."
+    trek.trek_status = 2
+    db.session.commit()
+    return redirect(url_for("staff_dashboard",staff_id=staff_id))
+
+
+#staff - manage trek
+@app.route("/staff/<int:staff_id>/trek/<int:trek_id>")
+def staff_trek(staff_id, trek_id):
+    trek = db.session.query(Treks).filter(Treks.trek_id == trek_id).first()
+
+    if not trek:
+        return "Trek not found."
+
+    # Get all bookings for this trek
+    bookings = db.session.query(Bookings).filter(Bookings.trek_id == trek_id).all()
+
+    return render_template("staff_treks.html",trek=trek,bookings=bookings,staff_id=staff_id)
+
+
+#staff - close trek
+@app.route("/staff/<int:staff_id>/trek/<int:trek_id>/close")
+def close_trek(staff_id, trek_id):
+    trek = db.session.query(Treks).filter(Treks.trek_id == trek_id).first()
+    if not trek:
+        return "Trek not found."
+
+    if trek.trek_status != 2:
+        return "This trek cannot be closed."
+
+    trek.trek_status = 3
+    db.session.commit()
+    return redirect(url_for("staff_trek",staff_id=staff_id,trek_id=trek_id))
+
+
+
+# staff- completed the trek
+
+@app.route("/staff/<int:staff_id>/trek/<int:trek_id>/complete")
+def complete_trek(staff_id, trek_id):
+    trek = db.session.query(Treks).filter(Treks.trek_id == trek_id).first()
+
+    if not trek:
+        return "Trek not found."
+
+    if trek.trek_status != 3:
+        return "This trek must be closed before marking it completed."
+    trek.trek_status = 4
+    db.session.commit()
+    return redirect(url_for("staff_trek",staff_id=staff_id,trek_id=trek_id))
