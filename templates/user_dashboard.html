@@ -10,9 +10,8 @@
     <header>
         <h2>Trakking Management System (TMS) : User</h2>
         <nav>
-            <a href="user_dashboard.html"> Dashboard </a>|
-            <a href="user_book.html"> Bookings </a>|
-            <a href="user_history.html"> My Trekkings </a>|
+            <a href="{{ url_for('user_dashboard', user_id=user_id) }}"> Dashboard </a>|
+            <a href="{{ url_for('user_history', user_id=user_id) }}"> My Trekkings </a>|
         </nav>
     </header>
 
@@ -21,33 +20,73 @@
 
         <h2 style="text-align: center;">Available Treks</h2> 
         <div class="center">
+            <form method="GET" action="{{ url_for('user_dashboard', user_id=user_id) }}">
             <select name="filter_diff">
-                <option value="All" disabled selected>Difficulty : All</option>
-                <option value="Hard">Hard</option>
-                <option value="Moderate">Moderate</option>
-                <option value="Easy">Easy</option>
+                <option value="All" {% if filter_diff == "All" %}selected{% endif %}>Difficulty : All</option>
+                <option value="Hard" {% if filter_diff == "Hard" %}selected{% endif %}>Hard</option>
+                <option value="Moderate" {% if filter_diff == "Moderate" %}selected{% endif %}>Moderate</option>
+                <option value="Easy" {% if filter_diff == "Easy" %}selected{% endif %}>Easy</option>
             </select>
+
+
             <select name="filter_loc">
-                <option value="All" disabled selected>Location : All</option>
-                <option value="Mum">Mumbai</option>
-                <option value="Himalaya">Himalaya</option>
-                <option value="Nepal">Nepal</option>
+                <option value="All" {% if filter_loc == "All" %}selected{% endif %}>Location : All</option>
+                {% for location in locations %}
+                <option value="{{ location }}"{% if filter_loc == location %}selected{% endif %}>{{ location }}</option>
+                {% endfor %}
             </select>
+
+            <button type="submit" class="btn-link">Filter</button>
+
+        </form>
         </div>
 
         <table class="normal" border="1">
             <tr><th>Trek Name</th> <th>Location</th>   <th>Difficulty</th>   <th>Duration(days)</th>   <th>Available Slots</th> <th>Action</th></tr>
-            <tr><td>XYZ</td>       <td>Nepalk</td>     <td>Medium</td>       <td>15</td>               <td>10</td>
-                <td><a href="user_book.html" class="btn-link btn-done">Book Now</a></td>
+            {% for trek in available_treks %}
+            <tr>
+                <td>{{ trek.trek_name }}</td>       
+                <td>{{ trek.location }}</td>     
+                <td>
+                    {% if trek.difficulty == 0 %}
+                        Easy
+                    {% elif trek.difficulty == 1 %}
+                        Moderate
+                    {% elif trek.difficulty == 2 %}
+                        Hard
+                    {% endif %}
+                </td>       
+                <td>{{ trek.duration_days }}</td>               
+                <td>{{ trek.avail_slots }}</td>
+                <td><a href="{{ url_for('user_book',user_id=user_id,trek_id=trek.trek_id) }}" class="btn-link btn-done">Book Now</a></td>
             </tr>
+            {% else %}
+
+            <tr><td colspan="6">No treks are currently available for booking.</td></tr>
+            {% endfor %}
         </table>
 
         <h2>My Bookings</h2>
         <table class="normal" border="1">
             <tr><th>Trek Name</th> <th>Booking Date</th>   <th>Status</th>      <th>Action</th></tr>
-            <tr><td>XYZ</td>       <td>xx/xx/xxxx</td>     <td>Booked</td>      
-                <td><a href="user_book.html" class="btn-link">View Detatils</a></td>
+            {% for booking in my_bookings %}
+            <tr><td>{{ booking.treks.trek_name }}</td>       
+                <td>{{ booking.booking_date.strftime('%d-%m-%Y') }}</td>     
+                <td>
+                    {% if booking.booking_status == 0 %}
+                        Booked
+                    {% elif booking.booking_status == 1 %}
+                        Cancelled
+                    {% elif booking.booking_status == 2 %}
+                        Completed
+                    {% endif %}
+                </td>      
+                <td><a href="{{ url_for('user_book',user_id=user_id,trek_id=booking.trek_id) }}" class="btn-link">View Detatils</a></td>
             </tr>
+            {% else %}
+
+            <tr><td colspan="4">You have no bookings.</td></tr>
+            {% endfor %}
         </table>
         
     </main>

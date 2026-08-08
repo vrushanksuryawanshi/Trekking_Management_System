@@ -10,9 +10,8 @@
     <header>
         <h2>Trakking Management System (TMS) : User</h2>
         <nav>
-            <a href="user_dashboard.html"> Dashboard </a>|
-            <a href="user_book.html"> Bookings </a>|
-            <a href="user_history.html"> My Trekkings </a>|
+            <a href="{{ url_for('user_dashboard', user_id=user_id) }}"> Dashboard </a>|
+            <a href="{{ url_for('user_history', user_id=user_id) }}"> My Trekkings </a>|
         </nav>        
     </header>
 
@@ -20,8 +19,27 @@
         <h1>Trekking History</h1>
 
         <table class="normal" border="1">
-            <tr><th>Trek Name</th>  <th>Start Date</th>  <th>Completed On</th> <th>Status</th></tr>
-            <tr><td>Kalsubai</td>   <td>xxx/xxx</td>     <td>xx/xx/xxxx</td>   <td>Completed</td></tr>
+            <tr><th>Booking ID</th> <th>Trek Name</th> <th>Location</th> <th>Start Date</th> <th>Booking Date</th> <th>Status</th></tr>
+            {% for booking in trek_history %}
+            <tr><td>{{ booking.booking_id }}</td>   
+                <td>{{ booking.treks.trek_name }}</td>     
+                <td>{{ booking.treks.location }}</td>   
+                <td>{{ booking.treks.start_date.strftime('%d-%m-%Y') }}</td>
+                <td>{{ booking.booking_date.strftime('%d-%m-%Y') }}</td>
+                <td>
+                {% if booking.booking_status == 0 %}
+                    Booked
+                {% elif booking.booking_status == 1 %}
+                    Cancelled
+                {% elif booking.booking_status == 2 %}
+                    Completed
+                {% endif %}
+                </td>
+            </tr>
+                    {% else %}
+
+        <tr><td colspan="6">You have not registered for any treks yet.</td></tr>
+        {% endfor %}
         </table>
         
     </main>

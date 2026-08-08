@@ -23,12 +23,10 @@ def signin():
             return render_template("admin_dashboard.html")
 
         if user and user.role == 1:
-            trekker = db.session.query(Trekker_Profiles).filter(
-                Trekker_Profiles.trekker_id == user.id
-            ).first()
+            trekker = db.session.query(Trekker_Profiles).filter(Trekker_Profiles.trekker_id == user.id).first()
             if trekker and trekker.status == 1:
                 return "Your account has been blacklisted."
-            return render_template("user_dashboard.html")
+            return redirect(url_for("user_dashboard",user_id=user.id))
 
         if user and user.role == 2:
             staff = db.session.query(Staff_Profiles).filter(Staff_Profiles.staff_id == user.id).first()
@@ -468,6 +466,191 @@ def complete_trek(staff_id, trek_id):
 
     if trek.trek_status != 3:
         return "This trek must be closed before marking it completed."
+
+    bookings = db.session.query(Bookings).filter(
+        Bookings.trek_id == trek_id,
+        Bookings.booking_status == 0
+    ).all()    
+
+    for booking in bookings:
+        booking.booking_status = 2    
+        
     trek.trek_status = 4
     db.session.commit()
     return redirect(url_for("staff_trek",staff_id=staff_id,trek_id=trek_id))
+
+
+
+
+#####################################################################################
+#user -dashboard
+@app.route("/user/<int:user_id>")
+def user_dashboard(user_id):
+
+    user = db.session.query(Users).filter(Users.id == user_id).first()
+
+    if not user:
+        return "User not found."
+
+    trekker = db.session.query(Trekker_Profiles).filter(Trekker_Profiles.trekker_id == user_id).first()
+
+    if not trekker:
+        return "Trekker profile not found."
+
+    filter_diff = request.args.get("filter_diff", "All")
+    filter_loc = request.args.get("filter_loc", "All")
+
+    # Only open treks
+    query = db.session.query(Treks).filter(Treks.trek_status == 2,Treks.avail_slots > 0)
+
+    # Difficulty filter
+    if filter_diff != "All":
+        diff_num = {
+            "Easy": 0,
+            "Moderate": 1,
+            "Hard": 2
+        }
+        query = query.filter(Treks.difficulty == diff_num[filter_diff])
+
+    # Location filter
+    if filter_loc != "All":
+        query = query.filter(Treks.location == filter_loc)
+
+    # this function is one of the most imp function, it will return the treks that are open to book
+    available_treks =query.order_by(Treks.start_date.asc()).all()
+
+
+    my_bookings = db.session.query(Bookings).filter(
+        Bookings.trekker_id == trekker.trekker_id).order_by(Bookings.booking_date.desc()).all()
+
+    # Get all locations from available/open treks
+    locations = db.session.query(Treks.location).filter(Treks.trek_status == 2,Treks.avail_slots > 0).distinct().all()
+    locations = [location[0] for location in locations]
+
+    return render_template("user_dashboard.html",user=user,
+                           user_id=user_id,
+                           trekker=trekker,available_treks=available_treks,
+                           my_bookings=my_bookings,
+                            filter_diff=filter_diff,
+                            filter_loc=filter_loc,
+                            locations=locations)
+
+
+
+#user- trek details and booking history implementation with proper logic
+@app.route("/user/<int:user_id>/trek/<int:trek_id>")
+def user_book(user_id, trek_id):
+    trek = db.session.query(Treks).filter(Treks.trek_id == trek_id).first()
+
+    if not trek:
+        return "Trek not found."
+
+    trekker = db.session.query(Trekker_Profiles).filter(Trekker_Profiles.trekker_id == user_id).first()
+
+    if not trekker:
+        return "User profile not found."
+
+    # Find this user's active booking for this trek
+    booking = db.session.query(Bookings).filter(
+        Bookings.trek_id == trek_id,
+        Bookings.trekker_id == trekker.trekker_id,
+        Bookings.booking_status == 0
+    ).first()
+
+    return render_template("user_book.html",trek=trek,trekker=trekker,booking=booking,user_id=user_id)
+
+#user - book trek
+
+@app.route("/user/<int:user_id>/trek/<int:trek_id>/book")
+def book_trek(user_id, trek_id):
+
+    trek = db.session.query(Treks).filter(Treks.trek_id == trek_id).first()
+    if not trek:
+        return "Trek not found."
+    
+    trekker = db.session.query(Trekker_Profiles).filter(Trekker_Profiles.trekker_id == user_id).first()
+    if not trekker:
+        return "User profile not found."
+
+    # Trek must be open
+    if trek.trek_status != 2:
+        return "This trek is not open for booking."
+
+    # Prevent overbooking
+    if trek.avail_slots <= 0:
+        trek.trek_status = 3
+        db.session.commit()
+        return "Sorry, this trek is fully booked."
+
+    # Prevent duplicate active booking
+    existing_booking = db.session.query(Bookings).filter(
+        Bookings.trek_id == trek_id,
+        Bookings.trekker_id == trekker.trekker_id,
+        Bookings.booking_status == 0
+    ).first()
+
+    if existing_booking:
+        return "You have already booked this trek."
+
+    # Create booking
+    booking = Bookings(
+        trek_id=trek_id,trekker_id=trekker.trekker_id,
+        booking_date=db.func.current_date(),booking_status=0
+    )
+
+    trek.avail_slots -= 1
+
+    db.session.add(booking)
+    db.session.commit()
+    return redirect(url_for("user_book",user_id=user_id,trek_id=trek_id))
+
+
+#user - cancel trek
+@app.route("/user/<int:user_id>/trek/<int:trek_id>/cancel")
+def cancel_booking(user_id, trek_id):
+
+    trek = db.session.query(Treks).filter(Treks.trek_id == trek_id).first()
+
+    if not trek:
+        return "Trek not found."
+
+    trekker = db.session.query(Trekker_Profiles).filter(Trekker_Profiles.trekker_id == user_id).first()
+
+    if not trekker:
+        return "User profile not found."
+
+    booking = db.session.query(Bookings).filter(
+        Bookings.trek_id == trek_id,
+        Bookings.trekker_id == trekker.trekker_id,
+        Bookings.booking_status == 0
+    ).first()
+
+    if not booking:
+        return "No active booking found."
+
+    # Cancel booking
+    booking.booking_status = 1
+
+    # Return the slot
+    trek.avail_slots += 1
+    if trek.trek_status == 3:
+        trek.trek_status = 2
+
+    db.session.commit()
+
+    return redirect(url_for("user_book",user_id=user_id,trek_id=trek_id))
+
+
+# final _user history
+@app.route("/user/history/<int:user_id>")
+def user_history(user_id):
+    user = db.session.query(Users).filter(Users.id == user_id).first()
+
+    if not user:
+        return "User not found."
+
+    trek_history = db.session.query(Bookings).filter(Bookings.trekker_id == user_id
+    ).order_by(Bookings.booking_date.desc()).all()
+
+    return render_template(
+        "user_history.html",user=user,user_id=user_id,trek_history=trek_history)

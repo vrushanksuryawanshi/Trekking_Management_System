@@ -10,37 +10,58 @@
     <header>
         <h2>Trakking Management System (TMS) : User</h2>
         <nav>
-            <a href="user_dashboard.html"> Dashboard </a>|
-            <a href="user_book.html"> Bookings </a>|
-            <a href="user_history.html"> My Trekkings </a>|
+            <a href="{{ url_for('user_dashboard', user_id=user_id) }}"> Dashboard </a>|
+            <a href="{{ url_for('user_history', user_id=user_id) }}"> My Trekkings </a>|
         </nav>        
     </header>
 
     <main>
-        <a href="user_dashboard.html" class="btn-link">Back to Treks</a>
-        <h1>Track Name</h1>
+        <a href="{{ url_for('user_dashboard', user_id=user_id) }}" class="btn-link">Back to Treks</a>
+        <h1>{{ trek.trek_name }},</h1>
 
         <table class="normal" border="1">
-            <tr><td>Location:</td><td>xyz</td></tr>
-            <tr><td>Difficulty:</td><td>Hard</td></tr>
-            <tr><td>Duration(days):</td><td>12</td></tr>
-            <tr><td>Start Date</td><td>xx/xx/xxxx</td></tr>
-            <tr><td>End Date:</td><td>xx/xx/xxxx</td></tr>
-            <tr><td>Available Slots:</td><td>10</td></tr>
+            <tr><td>Location:</td><td>{{ trek.location }}</td></tr>
+            <tr><td>Difficulty:</td><td>{{ trek.difficulty }}</td></tr>
+            <tr><td>Duration(days):</td><td>{{ trek.duration_days }}</td></tr>
+            <tr><td>Start Date</td><td>{{ trek.start_date }}</td></tr>
+            <tr><td>End Date:</td><td>{{ trek.end_date }}</td></tr>
+            <tr><td>Available Slots:</td><td>{{ trek.avail_slots }}</td></tr>
         </table>
 
         <h2>Description:</h2>
-        <p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Distinctio modi ullam laboriosam id fuga esse aspernatur ab quod soluta molestias ut et rem, laudantium sint doloribus commodi provident accusamus accusantium.</p>
+        <p>
+            {{ trek.description }}
+        </p>
 
-        <a href="#" class="btn-link btn-done">Book Now</a>
+        {% if booking %}
+        <p>You have booked this trek successfully, below are your booking details</p>
+        
+        {% elif trek.trek_status == 2 and trek.avail_slots > 0 %}
+        <a href="{{ url_for('book_trek',user_id=user_id,trek_id=trek.trek_id) }}"class="btn-link btn-done">
+            Book Now
+        </a>
 
+        {% elif trek.avail_slots == 0 %}
+        <p>This trek is fully booked.</p>
+        {% else %}
+        <p>This trek is currently not open for booking.</p>
+        {% endif %}
+
+        <!--if user have booked for the trek-->
+        {% if booking %}
         <h1>My Bookings:</h1>
         <table class="normal" border="1">
-            <tr><td>Booking Id:</td><td>xyz</td></tr>
-            <tr><td>Booking Status:</td><td>Booked/ Canceled / Completed</td></tr>
-            <tr><td>Booking Date:</td><td>xx/xx/xxxx</td></tr>
+            <tr><td>Booking Id:</td><td>{{ booking.booking_id }}</td></tr>
+            <tr><td>Booking Status:</td><td>Booked</td></tr>
+            <tr><td>Booking Date:</td><td>{{ booking.booking_date }}</td></tr>
+            <tr><td>Action:</td>
+                <td>
+                    <a href="{{ url_for('cancel_booking',user_id=user_id,trek_id=trek.trek_id) }}"
+                    class="btn-link btn-danger">Cancel Booking</a>
+                </td>    
+            </tr>
         </table>
-
+        {% endif %}
     </main>
 
     <footer>© 2026 Trekking Management System</footer>
