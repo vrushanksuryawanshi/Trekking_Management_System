@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/main.css">
-    <title>AdminDashboard</title>
+    <title>Add/Edit Trek</title>
 </head>
 <body>
     <header>
@@ -12,34 +12,59 @@
     </header>
 
     <main>
-        <h1>Add New Trek</h1>
-        <form>
+        <h1>Add/Edit Trek</h1>
+        <form method="POST"
+              action="{% if trek %}
+                        {{ url_for('edit_trek', trek_id=trek.trek_id) }}
+                      {% else %}
+                        {{ url_for('add_trek') }}
+                      {% endif %}"        
+        >
         <table>
-            <tr><td>Trek Name:</td> <td><input type="text" name="T_name"></td></tr>
-            <tr><td>Location:</td>  <td><input type="text" name="T_loc"></td></tr>
+            <tr><td>Trek Name:</td> <td><input type="text" name="T_name" value="{{ trek.trek_name if trek else '' }}" required></td></tr>
+            <tr><td>Location:</td>  <td><input type="text" name="T_loc" value="{{ trek.location if trek else '' }}" required></td></tr>
             <tr><td>Difficulty:</td> 
-                <td><select name="T_diff">
-                        <option value="None" disabled selected>None</option>
-                        <option value="Easy">Easy</option>
-                        <option value="Moderate">Moderate</option>
-                        <option value="Hard">Hardy</option>
+                <td><select name="T_diff" required>
+                        <option value="0" {% if trek and trek.difficulty == 0 %} selected {% endif %}>Easy
+                        </option>
+
+                        <option value="1" {% if trek and trek.difficulty == 1 %} selected {% endif %}>Moderate
+                        </option>
+
+                        <option value="2" {% if trek and trek.difficulty == 2 %} selected {% endif %}>Hard
+                        </option>
                 </td>
             </tr>
-            <tr><td>Duration(Days):</td>    <td><input type="number" name="T_days"></td></tr>
-            <tr><td>Available Slots:</td>   <td><input type="number" name="T_slots"></td></tr>
-            <tr><td>Start Date:</td>        <td><input type="Date" name="T_sdate"></td></tr>
-            <tr><td>Assign Staff:</td>      <td><input type="text" name="T_staff"></td></tr>
-            <tr><td>Status:</td>            
-                <td><select name="T_status">
-                    <option value="Open">Open</option>
-                    <option value="Closed">Closed</option>
+            <tr><td>Duration(Days):</td>    <td><input type="number" name="T_days" value="{{ trek.duration_days if trek else '' }}" required></td></tr>
+            <tr><td>Available Slots:</td>   <td><input type="number" name="T_slots" value="{{ trek.total_slots if trek else '' }}" required></td></tr>
+            <tr><td>Start Date:</td>        <td><input type="Date" name="T_sdate" value="{{ trek.start_date if trek else '' }}" required></td></tr>
+            <tr><td>Assign Staff:</td>
+                <td>
+                    <select name="T_staff">
+                        <option value="">-- No Staff Assigned for now --</option>
+                        {% for staff in approved_staff %}
+                        <option value="{{ staff.staff_id }}"
+                            {% if trek and trek.staff_id == staff.staff_id %}
+                                selected
+                            {% endif %}>{{ staff.name }}
+                        </option>
+                        {% endfor %}
+
+                    </select>
                 </td>
             </tr>
 
-            <tr><td>Description:</td> <td><textarea cols="20" row="3" name="T_discr"></textarea></td></tr>
+            <tr><td>Description:</td> <td><textarea cols="20" row="3" name="T_discr" required>{{ trek.description if trek else '' }}</textarea></td></tr>
         </table>
-        <a href="admin_treks.html" class="btn-link">Back</a> 
-        <a href="#" class="btn-link btn-done">Submit</a>     
+        <a href="{{ url_for('admin_treks') }}" class="btn-link">Back</a> 
+        
+        <button type="submit" class="btn-link btn-big">
+            {% if trek %}
+                Update Trek
+            {% else %}
+                Submit
+            {% endif %}
+        </button>
         </form>
  
 

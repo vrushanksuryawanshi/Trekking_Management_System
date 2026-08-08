@@ -1,7 +1,7 @@
 from app import *
 from flask import Flask, render_template,request, redirect, url_for
 from models import *
-
+from datetime import datetime, timedelta
 #defining app routes
 
 @app.route("/")
@@ -93,21 +93,195 @@ def admin_dashboard():
 
 
 
+
+
 # ADMIN - User Management
 
 @app.route("/admin/user")
 def admin_user():
-    return render_template("admin_user.html")
+    active_users = db.session.query(Trekker_Profiles).filter(Trekker_Profiles.status == 0).all()
+
+    blacklisted_users = db.session.query(Trekker_Profiles).filter(Trekker_Profiles.status == 1).all()
+
+    return render_template("admin_user.html",active_users=active_users,blacklisted_users=blacklisted_users)
+
+# block the user
+@app.route("/admin/user/block/<int:user_id>")
+def block_user(user_id):
+
+    user = db.session.query(Trekker_Profiles).filter(Trekker_Profiles.trekker_id == user_id).first()
+
+    if user:
+        user.status = 1
+        db.session.commit()
+
+    return redirect(url_for("admin_user"))
+
+#unblock the user
+@app.route("/admin/user/unblock/<int:user_id>")
+def unblock_user(user_id):
+    user = db.session.query(Trekker_Profiles).filter(Trekker_Profiles.trekker_id == user_id).first()
+
+    if user:
+        user.status = 0
+        db.session.commit()
+
+    return redirect(url_for("admin_user"))
+
+
+
+
+
 
 
 # ADMIN - Treks Management
 
 @app.route("/admin/treks")
 def admin_treks():
-    return render_template("admin_treks.html")
+    # 5 recent treks will be visible
+    recent_treks = db.session.query(Treks).order_by(Treks.start_date.desc()).limit(5).all()
+
+    return render_template("admin_treks.html",treks=recent_treks)
+
+#add new trek
+
+@app.route("/admin/treks/add", methods=["GET", "POST"])
+def add_trek():
+
+    approved_staff = db.session.query(Staff_Profiles).filter(
+        Staff_Profiles.status == 2
+    ).all()
+
+    if request.method == "POST":
+
+        trek_name = request.form.get("T_name")
+        location = request.form.get("T_loc")
+        difficulty = int(request.form.get("T_diff"))
+        duration = int(request.form.get("T_days"))
+        total_slots = int(request.form.get("T_slots"))
+        start_date = datetime.strptime(
+            request.form.get("T_sdate"),
+            "%Y-%m-%d"
+        ).date()
+
+        description = request.form.get("T_discr")
+
+        staff_id = request.form.get("T_staff")
+
+        if staff_id:
+            staff_id = int(staff_id)
+        else:
+            staff_id = None
+
+        # Calculate end date automatically
+        end_date = start_date + timedelta(days=duration - 1)
+
+        trek = Treks(
+            trek_name=trek_name,
+            location=location,
+            duration_days=duration,
+            total_slots=total_slots,
+
+            # Initially all slots are available
+            avail_slots=total_slots,
+
+            staff_id=staff_id,
+            difficulty=difficulty,
+
+            # New trek as Pending, need approval
+            trek_status=0,
+
+            start_date=start_date,
+            end_date=end_date,
+            description=description
+        )
+
+        db.session.add(trek)
+        db.session.commit()
+
+        return redirect(url_for("admin_treks"))
+
+    return render_template("Add_trek.html",approved_staff=approved_staff,trek=None)
+
+# Edit Trek
+@app.route("/admin/treks/edit/<int:trek_id>", methods=["GET", "POST"])
+def edit_trek(trek_id):
+
+    trek = db.session.query(Treks).filter(Treks.trek_id == trek_id).first()
+
+    if not trek:
+        return "Trek not found"
+
+    approved_staff = db.session.query(Staff_Profiles).filter(Staff_Profiles.status == 2).all()
+
+    if request.method == "POST":
+
+        trek.trek_name = request.form.get("T_name")
+        trek.location = request.form.get("T_loc")
+        trek.difficulty = int(request.form.get("T_diff"))
+        trek.duration_days = int(request.form.get("T_days"))
+
+        new_total_slots = int(request.form.get("T_slots"))
+
+        # Number of already booked slots
+        booked_slots = trek.total_slots - trek.avail_slots
 
 
+        trek.total_slots = new_total_slots
 
+        # Recalculate available slots
+        trek.avail_slots = new_total_slots - booked_slots
+
+        trek.start_date = datetime.strptime(
+            request.form.get("T_sdate"),
+            "%Y-%m-%d"
+        ).date()
+
+        trek.end_date = trek.start_date + timedelta(
+            days=trek.duration_days - 1
+        )
+
+        trek.description = request.form.get("T_discr")
+
+        staff_id = request.form.get("T_staff")
+
+        if staff_id:
+            trek.staff_id = int(staff_id)
+        else:
+            trek.staff_id = None
+
+        db.session.commit()
+
+        return redirect(url_for("admin_treks"))
+
+    return render_template("Add_trek.html",approved_staff=approved_staff,trek=trek)
+
+
+# approve trek
+
+@app.route("/admin/treks/approve/<int:trek_id>")
+def approve_trek(trek_id):
+
+    trek = db.session.query(Treks).filter(
+        Treks.trek_id == trek_id
+    ).first()
+
+    if trek:
+        trek.trek_status = 1
+        db.session.commit()
+
+    return redirect(url_for("admin_treks"))
+
+#admin - bookings to show all treks till date
+
+@app.route("/admin/bookings")
+def admin_bookings():
+
+    all_bookings = db.session.query(Bookings).order_by(
+        Bookings.booking_date.desc()
+    ).all()
+
+    return render_template("admin_bookings.html",bookings=all_bookings)
 
 
 

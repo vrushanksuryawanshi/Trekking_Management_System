@@ -19,16 +19,56 @@
 
     <main>
         <h1>Trekking Info</h1>
-        <a href="Add_trek.html" class="btn-link btn-big">+ Add New Trek</a>
+        <a href="{{ url_for('add_trek') }}" class="btn-link btn-big">+ Add New Trek</a>
         
         <table class="normal" border="1">
-            <tr><th>ID</th>     <th>Trek Name</th>   <th>Location</th>   <th>Difficulty</th>        <th>slots</th>  <th>Status</th>  <th>Actions</th></tr>
-            <tr><td>101</td>     <td>Snow Fun</td>    <td>Himalaya</td>  <td>hard/Mod/Easy</td>     <td>10</td>     <td>open/closed</td>
-                <td><a href="Add_trek.html" class="btn-link">Edit</a><a href="#" class="btn-link btn-danger">Delete</a></tr>
+            <tr><th>ID</th>     <th>Trek Name</th>   <th>Location</th>   <th>Difficulty</th>        <th>slots</th>  <th>Status</th>  <th>Staff</th> <th>Actions</th></tr>
+            
+            {% for trek in treks %}
+            <tr><td>{{ trek.trek_id }}</td>
+                <td>{{ trek.trek_name }}</td>
+                <td>{{ trek.location }}</td>
+                <td>{% if trek.difficulty == 0 %} Easy {% elif trek.difficulty == 1 %} Moderate {% else %} hard {% endif %}</td>     
+                <td>{{ trek.avail_slots }} / {{ trek.total_slots }}</td>     
+                <td>
+                    {% if trek.trek_status == 0 %}
+                        Pending
+                    {% elif trek.trek_status == 1 %}
+                        Approved
+                    {% elif trek.trek_status == 2 %}
+                        Open
+                    {% elif trek.trek_status == 3 %}
+                        Closed
+                    {% elif trek.trek_status == 4 %}
+                        Completed
+                    {% endif %}
+                </td>
+
+                <td>
+                {% if trek.staff_profiles %}
+                    {{ trek.staff_profiles.name }}
+                {% else %}
+                    Not Assigned
+                {% endif %}
+                </td>
+                <td><a href="{{ url_for('edit_trek', trek_id=trek.trek_id) }}" class="btn-link">Edit</a>
+                    
+                    {% if trek.trek_status == 0 %}
+                    <a href="{{ url_for('approve_trek',trek_id=trek.trek_id) }}"class="btn-link btn-done">Approve</a>
+                    {% endif %}
+                </td>
+
+            {% else %}
+
+            <tr>
+                <td colspan="8">No treks available</td>
+            </tr>
+            
+            {% endfor %}
         </table>
 
         <nav>
-                <a href="admin_bookings.html"> View All Bookings → </a>
+                <a href="{{ url_for('admin_bookings') }}"> View All Bookings → </a>
         </nav>
     </main>
 

@@ -23,15 +23,25 @@
         <h3>Active Users:</h3>
             <table class="normal" border="1">
                 <tr><th>User ID</th>     <th>Name</th>     <th>Email</th>   <th>Contact</th>  <th>Actions</th></tr>
-                <tr><td>101</td>          <td>Vaibhav</td>  <td>XXX</td>      <td>XXXX</td>   
-                <td><a href="#" class="btn-link btn-danger">Block</a></td></tr>
+                
+                {% for user in active_users %}
+                <tr><td>{{ user.trekker_id }}</td>          <td>{{ user.name }}</td>  <td>{{ user.users.email }}</td>      <td>{{ user.phone }}</td>   
+                    <td><a href="{{ url_for('block_user', user_id=user.trekker_id) }}" class="btn-link btn-danger">Block</a></td></tr>
+                {% else %}
+                <tr><td colspan="5">No active users.</td></tr>
+                {% endfor %}
             </table>
+
 
         <h3>Blacklisted Users:</h3>:</h3>
             <table class="normal" border="1">
                 <tr><th>Staff ID</th>     <th>Name</th>     <th>Email</th>   <th>Contact</th>  <th>Actions</th></tr>
-                <tr><td>101</td>          <td>Vaibhav</td>  <td>XXX</td>      <td>XXXX</td>   
-                <td><a href="#" class="btn-link">Unblock</a></td></tr>
+                {% for user in blacklisted_users%}
+                <tr><td>{{ user.trekker_id }}</td>          <td>{{ user.name }}</td>  <td>{{ user.users.email }}</td>      <td>{{ user.phone }}</td>   
+                <td><a href="{{ url_for('unblock_user', user_id=user.trekker_id) }}" class="btn-link">Unblock</a></td></tr>
+                {% else %}
+                <tr><td colspan="5">No Blacklisted User</td></tr>
+                {% endfor %}
             </table>
             </table>
     </main>

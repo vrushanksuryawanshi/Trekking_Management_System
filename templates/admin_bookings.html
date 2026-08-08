@@ -14,12 +14,35 @@
     <main>
         <h3>All Bookings</h3>
         <table class="normal" border="1">
-            <tr><th>Booking ID</th> <th>User</th>   <th>Trek</th>   <th>Booking Date</th>   <th>Status</th></tr>
-            <tr><td>101</td>        <td>Vrushank</td><td>Himalaya</td><td>10/05/2029</td>   <td>Open/Closed</td></tr>
+            <tr><th>Booking ID</th> <th>User</th>   <th>Trek</th>   <th>Trek Date</th>  <th>Booking Date</th>   <th>Status</th></tr>
+            
+            {% for booking in bookings %}
+            <tr><td>{{ booking.booking_id }}</td>   
+                <td>{{ booking.trekker_profiles.name }}</td>
+                <td>{{ booking.treks.trek_name }}</td>
+                <td>{{ booking.treks.start_date.strftime('%d-%m-%Y') }}</td>
+                <td>{{ booking.booking_date.strftime('%d-%m-%Y') }}</td>
+                <td>
+                    {% if booking.booking_status == 0 %}
+                        Booked
+                    {% elif booking.booking_status == 1 %}
+                        Cancelled
+                    {% elif booking.booking_status == 2 %}
+                        Completed
+                    {% endif %}
+                </td>
+            </tr>
+            
+            {% else %}
+
+            <tr><td colspan="6">No bookings available.</td></tr>
+            
+            {% endfor %}
         </table>
 
         <nav>
-                <a href="admin_dashboard.html"> Back to Dashboard</a>
+                <a href="{{ url_for('admin_treks') }}"> Back to Treks</a>|
+                <a href="{{ url_for('admin_dashboard') }}">Back to Dashboard</a>
         </nav>
     </main>
 
