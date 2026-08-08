@@ -3,9 +3,10 @@ from flask import Flask, render_template,request, redirect, url_for
 from models import *
 
 #defining app routes
+
 @app.route("/")
 def home():
-    return "welcome to TMS"
+    return redirect(url_for('signin'))
 
 @app.route("/login", methods=["POST","GET"])
 def signin():
@@ -22,15 +23,21 @@ def signin():
             return render_template("admin_dashboard.html")
 
         if user and user.role == 1:
+            trekker = db.session.query(Trekker_Profiles).filter(
+                Trekker_Profiles.trekker_id == user.id
+            ).first()
+            if trekker and trekker.status == 1:
+                return "Your account has been blacklisted."
             return render_template("user_dashboard.html")
 
         if user and user.role == 2:
             staff = db.session.query(Staff_Profiles).filter(
                 Staff_Profiles.staff_id == user.id
             ).first()
-
             if staff and staff.status == 2:
                 return render_template("staff_dashboard.html")
+            elif staff and staff.status == 1:
+                return "Your staff account has been blacklisted."
             else:
                 return "Your staff account is waiting for admin approval."
 
@@ -70,3 +77,121 @@ def signup():
         return redirect(url_for("signin"))
     else:
         return render_template("signup.html")
+
+
+
+
+
+
+
+# ADMIN - Dashboard Management
+
+@app.route("/admin")
+def admin_dashboard():
+    return render_template("admin_dashboard.html")
+
+
+
+
+# ADMIN - User Management
+
+@app.route("/admin/user")
+def admin_user():
+    return render_template("admin_user.html")
+
+
+# ADMIN - Treks Management
+
+@app.route("/admin/treks")
+def admin_treks():
+    return render_template("admin_treks.html")
+
+
+
+
+
+
+
+
+# ADMIN - Staff Management
+
+@app.route("/admin/staff")
+def admin_staff():
+
+    pending_staff = db.session.query(Staff_Profiles).filter(
+        Staff_Profiles.status == 0
+    ).all()
+
+    approved_staff = db.session.query(Staff_Profiles).filter(
+        Staff_Profiles.status == 2
+    ).all()
+
+    blacklisted_staff = db.session.query(Staff_Profiles).filter(
+        Staff_Profiles.status == 1
+    ).all()
+
+    return render_template(
+        "admin_staff.html",
+        pending_staff=pending_staff,
+        approved_staff=approved_staff,
+        blacklisted_staff=blacklisted_staff
+    )
+
+
+# Approve staff
+
+@app.route("/admin/staff/approve/<int:staff_id>")
+def approve_staff(staff_id):
+
+    staff = db.session.query(Staff_Profiles).filter(
+        Staff_Profiles.staff_id == staff_id
+    ).first()
+
+    if staff:
+        staff.status = 2
+        db.session.commit()
+
+    return redirect(url_for("admin_staff"))
+
+
+# Reject staff
+
+@app.route("/admin/staff/reject/<int:staff_id>")
+def reject_staff(staff_id):
+
+    staff = db.session.query(Staff_Profiles).filter(
+        Staff_Profiles.staff_id == staff_id
+    ).first()
+
+    if staff:
+        # Delete staff profile
+        user = db.session.query(Users).filter(
+            Users.id == staff.staff_id
+        ).first()
+
+        db.session.delete(staff)
+
+        if user:
+            db.session.delete(user)
+
+        db.session.commit()
+
+    return redirect(url_for("admin_staff"))
+
+
+# Blacklist approved staff
+
+@app.route("/admin/staff/blacklist/<int:staff_id>")
+def blacklist_staff(staff_id):
+
+    staff = db.session.query(Staff_Profiles).filter(
+        Staff_Profiles.staff_id == staff_id
+    ).first()
+
+    if staff:
+        staff.status = 1
+        db.session.commit()
+
+    return redirect(url_for("admin_staff"))
+
+
