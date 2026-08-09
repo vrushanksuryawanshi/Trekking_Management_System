@@ -28,8 +28,9 @@
         <table class="normal" border="1">
             <tr><th>Booking ID</th> <th>User</th>   <th>Trek</th>   <th>Trek Date</th>  <th>Booking Date</th>   <th>Status</th></tr>
             {% for booking in recent_bookings %}
-            <t><td>{{ booking.booking_id }}</td>        
+            <tr><td>{{ booking.booking_id }}</td>        
                 <td>{{ booking.trekker_profiles.name }}</td>
+                <td>{{ booking.treks.trek_name }}</td>
                 <td>{{ booking.treks.start_date.strftime('%d-%m-%Y') }}</td>
                 <td>{{ booking.booking_date.strftime('%d-%m-%Y') }}</td>   
                 <td>                

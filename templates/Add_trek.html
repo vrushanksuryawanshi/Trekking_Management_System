@@ -54,7 +54,7 @@
                 </td>
             </tr>
 
-            <tr><td>Description:</td> <td><textarea cols="20" row="3" name="T_discr" required>{{ trek.description if trek else '' }}</textarea></td></tr>
+            <tr><td>Description:</td> <td><textarea cols="40" rows="5" name="T_discr" required>{{ trek.description if trek else '' }}</textarea></td></tr>
         </table>
         <a href="{{ url_for('admin_treks') }}" class="btn-link">Back</a> 
         
