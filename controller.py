@@ -20,7 +20,7 @@ def signin():
         ).first()
 
         if user and user.role == 0:
-            return render_template("admin_dashboard.html")
+            return redirect(url_for("admin_dashboard"))
 
         if user and user.role == 1:
             trekker = db.session.query(Trekker_Profiles).filter(Trekker_Profiles.trekker_id == user.id).first()
